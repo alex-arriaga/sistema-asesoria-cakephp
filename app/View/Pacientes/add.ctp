@@ -3,7 +3,7 @@
 	<fieldset>
 		<legend><?php echo __('Nuevo Paciente'); ?></legend>
 	<?php
-         
+
 		echo $this->Form->input('nombre');
                 echo $this->Form->input('apellido');
 		echo $this->Form->input('direccion');
@@ -13,7 +13,19 @@
                 'Femenino'=>'Femenino',
                 'Masculino'=>'Masculino',
                 'Otro'=>'Otro')));
-                echo $this->Form->input('fecha_nac',array('dateFormat'=>'DMY','label'=>'Fecha de Nacimiento'));
+		// Configurando opciones para agregar más años
+		$options = array(
+			'label' => 'Fecha de nacimiento', // Etiqueta
+			'dateFormat'    => 'DMY',	// Formato a como lo usamos en español
+			'minYear'       => date('Y') - 100, // Configuramos para que aparezcan desde el año actual hasta 100 años menos
+			'maxYear'       => date('Y'),		// Aparecerá hasta el año actual como máximo
+			'empty'         => array( // Etiquetas para los selects (empty options)
+				'day'       => 'Día',
+				'month'     => 'Mes',
+				'year'      => 'Año'
+			)
+		);
+		echo $this->Form->input('fecha_nac', $options);
 	?>
 	</fieldset>
 
