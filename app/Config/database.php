@@ -68,9 +68,9 @@ class DATABASE_CONFIG {
 		'datasource' => 'Database/Mysql',
 		'persistent' => false,
 		'host' => 'localhost',
-		'login' => 'root',
-		'password' => '',
-		'database' => 'sistema',
+		'login' => 'hiv_user',
+		'password' => 'hiv_password',
+		'database' => 'sistema_asesoria_hiv',
 		'prefix' => '',
 		'encoding' => 'utf8',
 	);
