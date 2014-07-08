@@ -11,14 +11,64 @@ class PacientesController extends AppController {
 				'Paciente.id' => 'asc'
 				)
 		);
-       public function index() {
-               $this->Paciente->recursive = 0;
-	       $pacientes = $this->paginate();
-                if ($this->request->is('requested')) { // Para el funcionamiento del llamado asíncrono
-                return $pacientes;}
-                else { $this->set('pacientes', $pacientes);}
+	public function index() {
+		$this->Paciente->recursive = 0;
+		$pacientes = $this->paginate();
+		if ($this->request->is('requested')) { // Para el funcionamiento del llamado asíncrono
+			return $pacientes;
+		}
+		else { $this->set('pacientes', $pacientes); }
 	}
-	
+
+	/**
+	 * buscar: Este método es sólo un placeholder para el formulario de búsqueda
+	 * @return nil
+	 */
+	public function buscar() {
+
+	}
+
+	/**
+	 * getData: Obtiene los datos de un paciente dado el ID del mismo
+	 * @param  int $id el ID del paciente
+	 * @return JSON object con los datos del paciente
+	 */
+	public function getData($id = null){
+		if ($this->request->is('ajax')) { // Sólo es posible obtener datos via Ajax
+			$this->Paciente->recursive = 0;
+			$this->RequestHandler->respondAs('json');	// Establecemos el Content-Type como application/json
+			$this->set('paciente', $this->Paciente->findById($id));
+			$this->layout = 'ajax';
+		}
+	}
+
+	/**
+	 * getList: Permite obtener una lista de objetos en json dado un criterio de búsqueda (term)
+	 * @return JSON objects array
+	 */
+	public function getList(){
+		if ($this->request->is('ajax')) { // Sólo es posible obtener datos via Ajax
+			$term = $this->request->query['term'];
+			if($term != ''){
+				$this->RequestHandler->respondAs('json');
+				$this->Paciente->recursive = 0;
+
+				$this->set('pacientes', $this->Paciente->find('all', array(
+					'conditions' => array(
+						'OR' => array(
+							'Paciente.nombre LIKE '=> '%'.$term.'%',
+							'Paciente.apellido LIKE '=> '%'.$term.'%'
+						)
+					),
+					'fields' => array('id','nombre','apellido')
+				)));
+			}else{
+				$this->set('pacientes', array());
+			}
+
+			$this->layout = 'ajax';
+		}
+	}
 
 	public function view($id = null) {
 		if (!$this->Paciente->exists($id)) {
@@ -39,16 +89,16 @@ class PacientesController extends AppController {
 
 			// Se calcula la edad y se deja en los datos que se intentaran guardar
 			$this->request->data['Paciente']['edad'] = $this->__getEdad($day, $month, $year);
-                        
+
                         // Antes de guardar se calcula el codigo del paciente y se pasa a mayusculas el nombre y apellido
                         $sex 	= $this->request->data['Paciente']['sexo'];
                         $nom	= $this->request->data['Paciente']['nombre'] = strtoupper( $this->request->data['Paciente']['nombre']);
 			$ap	= $this->request->data['Paciente']['apellido'] = strtoupper( $this->request->data['Paciente']['apellido']);
-                       
+
                         //Se calcula el codigo y se deja en los datos que se intentaran guardar
                         $this->request->data['Paciente']['codigo'] = $this->__getCodigo($sex,$nom,$ap,$day, $month, $year);
-                        
-              
+
+
 			if ($this->Paciente->save($this->request->data)) {
 				$this->Session->setFlash(__('El paciente a sido guardado correctamente'));
 				return $this->redirect(array('action' => 'index'));
@@ -72,7 +122,7 @@ class PacientesController extends AppController {
                 $codigo= $difsex.$difnom.$difap.$day.$month.$year;
                 return $codigo;
         }
-        
+
 	public function edit($id = null) {
 		if (!$this->Paciente->exists($id)) {
 			throw new NotFoundException(__('El paciente no existe'));
@@ -86,12 +136,12 @@ class PacientesController extends AppController {
 
 			// Se calcula la edad y se deja en los datos que se intentaran guardar
 			$this->request->data['Paciente']['edad'] = $this->__getEdad($day, $month, $year);
-                        
+
                         // Antes de guardar se calcula el codigo del paciente y se pasa a mayusculas el nombre y el apellido
                         $sex 	= $this->request->data['Paciente']['sexo'];
                         $nom	= $this->request->data['Paciente']['nombre'] = strtoupper( $this->request->data['Paciente']['nombre']);
 			$ap	= $this->request->data['Paciente']['apellido'] = strtoupper( $this->request->data['Paciente']['apellido']);
-                       
+
                         //Se calcula el codigo y se deja en los datos que se intentaran guardar
                         $this->request->data['Paciente']['codigo'] = $this->__getCodigo($sex,$nom,$ap,$day, $month, $year);
 
@@ -104,7 +154,7 @@ class PacientesController extends AppController {
 		} else {
 			$options = array('conditions' => array('Paciente.' . $this->Paciente->primaryKey => $id));
 			$this->request->data = $this->Paciente->find('first', $options);
-		}		
+		}
 	}
 
 	public function delete($id = null) {
